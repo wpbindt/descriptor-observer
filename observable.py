@@ -1,9 +1,11 @@
-from typing import Generic, Optional, Protocol, TypeVar
+from abc import ABC, abstractmethod
+from typing import Generic, Optional, TypeVar
 
 T = TypeVar('T')
 
 
-class Observer(Protocol[T]):
+class Observer(ABC, Generic[T]):
+    @abstractmethod
     def update(self, value: T) -> None:
         ...
 
@@ -13,22 +15,25 @@ class ObservableAttribute(Generic[T]):
         self.value: Optional[T] = None
         self.observers = observers
 
-    def __get__(self, obj, type=None) -> T:
+    def __get__(self, obj: object, type: type = None) -> T:
         if self.value is None:
             raise AttributeError('Not set')
         return self.value
 
-    def __set__(self, obj, value: T) -> None:
+    def __set__(self, obj: object, value: T) -> None:
         self.value = value
         for observer in self.observers:
             observer.update(self.value)
 
+    @classmethod
+    def create(cls) -> tuple[list[Observer[T]], ObservableAttribute[T]]:
+        observers: list[Observer[T]] = []
+        return observers, cls(observers)
+
 
 class ObservableExample:
-    a_observers = []
-    a = ObservableAttribute(a_observers)
-    c_observers = []
-    a = ObservableAttribute(c_observers)
+    a_observers, a = ObservableAttribute[int].create()
+    c_observers, c = ObservableAttribute[str].create()
 
     def __init__(self, a: int, b: int, c: str) -> None:
         self.a = a
@@ -40,3 +45,4 @@ class ObservableExample:
 
     def c_register(self, observer: Observer[str]) -> None:
         self.c_observers.append(observer)
+
