@@ -49,23 +49,24 @@ class ConcreteObserver(Observer[int]):
         print(f'I have been notified the value is now {value}')
 
 
-example = ObservableExample(1, 2, 'three')
-observer = ConcreteObserver()
+if __name__ == '__main__':
+    example = ObservableExample(1, 2, 'three')
+    observer = ConcreteObserver()
 
-# before registering, the observer does not get updated
-example.a += 1
+    # before registering, the observer does not get updated
+    example.a += 1
 
-# after registering, the observer gets notified anytime
-# the attribute changes.
-example.a_register(observer)
-example.a += 1
-example.a = 1
+    # after registering, the observer gets notified anytime
+    # the attribute changes.
+    example.a_register(observer)
+    example.a += 1
+    example.a = 1
 
-# the observer does not get notified when other attributes change
-example.c = 'nine'
-example.b = 1
+    # the observer does not get notified when other attributes change
+    example.c = 'nine'
+    example.b = 1
 
-# other Observable instances do not notify observers of pre-existing
-# instances
-example2 = ObservableExample(900, 1, 'ok')
+    # other Observable instances do not notify observers of pre-existing
+    # instances
+    example2 = ObservableExample(900, 1, 'ok')
 
