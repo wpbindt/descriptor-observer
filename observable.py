@@ -12,33 +12,25 @@ class Observer(ABC, Generic[T]):
 
 
 class ObservableAttribute(Generic[T]):
-    def __init__(self, observers: list[Observer[T]]) -> None:
-        self.value: Optional[T] = None
-        self.observers = observers
+    def __set_name__(self, owner, name):
+        self.name = name
 
-    def __get__(self, obj: object, type: type = None) -> T:
-        if self.value is None:
-            raise AttributeError('Not set')
-        return self.value
-
-    def __set__(self, obj: object, value: T) -> None:
-        self.value = value
-        for observer in self.observers:
-            observer.update(self.value)
-
-    @classmethod
-    def create(cls) -> tuple[list[Observer[T]], ObservableAttribute[T]]:
-        observers: list[Observer[T]] = []
-        return observers, cls(observers)
+    def __set__(self, instance: object, value: T) -> None:
+        instance.__dict__[self.name] = value
+        observers = getattr(instance, self.name + '_observers')
+        for observer in observers:
+            observer.update(value)
 
 
 class ObservableExample:
-    a_observers, a = ObservableAttribute[int].create()
-    c_observers, c = ObservableAttribute[str].create()
+    a = ObservableAttribute[int]()
+    c = ObservableAttribute[str]()
 
     def __init__(self, a: int, b: int, c: str) -> None:
+        self.a_observers: list[Observer[int]] = []
         self.a = a
         self.b = b
+        self.c_observers: list[Observer[str]] = []
         self.c = c
 
     def a_register(self, observer: Observer[int]) -> None:
@@ -68,4 +60,8 @@ example.a = 1
 # the observer does not get notified when other attributes change
 example.c = 'nine'
 example.b = 1
+
+# other Observable instances do not notify observers of pre-existing
+# instances
+example2 = ObservableExample(900, 1, 'ok')
 
