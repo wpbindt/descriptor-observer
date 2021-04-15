@@ -12,11 +12,11 @@ class Observer(ABC, Generic[T]):
 
 
 class ObservableAttribute(Generic[T]):
-    def __get__(self, instance, owner) -> T:
+    def __get__(self, instance: object, owner: type) -> T:
         # we have to implement this to make mypy happy
         return instance.__dict__[self.name]
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner: type, name: str) -> None:
         self.name = name
 
     def __set__(self, instance: object, value: T) -> None:
